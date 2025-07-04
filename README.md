@@ -1,0 +1,2 @@
+# multi_app_test
+暂时用compose来测试ai编写程序能力
