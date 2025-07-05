@@ -6,6 +6,11 @@ class TaskRepository {
     // 这里用内存列表模拟数据源，后续可替换为数据库或网络
     private val taskList = mutableListOf<Task>()
 
+    init {
+        // 初始化时添加初始任务
+        taskList.addAll(getInitialTasks())
+    }
+
     fun getTasks(): List<Task> = taskList.sortedByDescending { it.priority }
 
     fun addTask(task: Task) {
@@ -13,7 +18,14 @@ class TaskRepository {
     }
 
     fun removeTask(task: Task) {
-        taskList.remove(task)
+        taskList.removeAll { it.id == task.id }
+    }
+
+    fun updateTask(updatedTask: Task) {
+        val index = taskList.indexOfFirst { it.id == updatedTask.id }
+        if (index != -1) {
+            taskList[index] = updatedTask
+        }
     }
 
     fun clearTasks() {

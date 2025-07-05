@@ -8,7 +8,8 @@ data class Task(
     val description: String = "",
     val profitability: Int, // 收益性 1~5
     val urgency: Int,       // 紧迫性 1~5
-    val difficulty: Int     // 难易度 1~5
+    val difficulty: Int,    // 难易度 1~5
+    val isDone: Boolean = false // 新增：是否已完成
 ) {
     // 综合优先级，数值越高优先级越高（可自定义权重）
     val priority: Double

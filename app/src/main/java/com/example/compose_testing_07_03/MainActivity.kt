@@ -8,7 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.*
-import com.example.compose_testing_07_03.ui.screen.PriorityListScreen
 import com.example.compose_testing_07_03.ui.screen.BlankScreen
 import com.example.compose_testing_07_03.ui.theme.Compose_testing_07_03Theme
 import androidx.compose.material.BottomNavigation
@@ -17,6 +16,10 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.Scaffold
 import com.example.compose_testing_07_03.ui.screen.TaskListScreen
+import com.example.compose_testing_07_03.ui.screen.FeatureSelectScreen
+import com.example.compose_testing_07_03.ui.screen.AddTaskScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.compose_testing_07_03.viewmodel.TaskViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,45 +35,29 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    val items = listOf(
-        NavItem("优先级", "priority"),
-        NavItem("空白1", "blank1"),
-        NavItem("空白2", "blank2"),
-        NavItem("空白3", "blank3")
-    )
-    Scaffold(
-        bottomBar = {
-            BottomNavigation {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry?.destination?.route
-                items.forEach { item ->
-                    BottomNavigationItem(
-                        label = { Text(item.title) },
-                        selected = currentRoute == item.route,
-                        onClick = {
-                            if (currentRoute != item.route) {
-                                navController.navigate(item.route) {
-                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
-                        },
-                        icon = { /* 可选：可放置Icon()，此处留空 */ }
-                    )
-                }
-            }
+    val taskViewModel: TaskViewModel = viewModel()
+    NavHost(
+        navController = navController,
+        startDestination = "feature_select"
+    ) {
+        composable("feature_select") {
+            FeatureSelectScreen(onPriorityClick = {
+                navController.navigate("priority")
+            })
         }
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = "priority",
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable("priority") { TaskListScreen() }
-            composable("blank1") { BlankScreen() }
-            composable("blank2") { BlankScreen() }
-            composable("blank3") { BlankScreen() }
+        composable("priority") { TaskListScreen(viewModel = taskViewModel, navController = navController) }
+        composable("add_task") { AddTaskScreen(navController = navController, viewModel = taskViewModel) }
+        composable("priority") { 
+            TaskListScreen(
+                viewModel = taskViewModel, 
+                navController = navController
+            ) 
+        }
+        composable("add_task") { 
+            AddTaskScreen(
+                navController = navController, 
+                viewModel = taskViewModel
+            ) 
         }
     }
 }
