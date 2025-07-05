@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-
+//软件初始页面，功能选择页面
 @Composable
 fun FeatureSelectScreen(onPriorityClick: () -> Unit) {
     Column(

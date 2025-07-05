@@ -15,12 +15,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.compose_testing_07_03.viewmodel.TaskViewModel
 import com.example.compose_testing_07_03.data.model.Task
 import androidx.navigation.NavController
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun TaskListScreen(viewModel: TaskViewModel = viewModel(), navController: NavController? = null) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("未完成", "已完成")
-    val tasks = if (selectedTab == 0) viewModel.unfinishedTasks else viewModel.finishedTasks
+    val displayTasks = if (selectedTab == 0) viewModel.unfinishedTasksSorted else viewModel.finishedTasksSorted
 
     Scaffold(
         topBar = {
@@ -31,7 +32,7 @@ fun TaskListScreen(viewModel: TaskViewModel = viewModel(), navController: NavCon
                         .padding(8.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    IconButton(onClick = { navController?.navigate("add_task") }) {
+                    IconButton(onClick = { navController?.navigate("task_form") }) {
                         Text("＋", color = Color(0xFF4CAF50), style = MaterialTheme.typography.h4)
                     }
                 }
@@ -56,16 +57,15 @@ fun TaskListScreen(viewModel: TaskViewModel = viewModel(), navController: NavCon
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(tasks, key = { it.id }) { task ->
+            items(displayTasks, key = { it.id }) { task ->
                 if (selectedTab == 0) {
                     TaskItem(
                         task = task,
                         onDone = { viewModel.markTaskDone(task) },
                         onRemove = { viewModel.removeTask(task) },
                         doneMode = false,
-                        onClick = { 
-                            // 点击任务项后跳转到功能选择页面
-                            navController?.navigate("add_task")
+                        onClick = {
+                            navController?.navigate("task_form/${task.id}")
                         }
                     )
                 } else {
@@ -74,9 +74,8 @@ fun TaskListScreen(viewModel: TaskViewModel = viewModel(), navController: NavCon
                         onDone = {},
                         onRemove = { viewModel.removeTask(task) },
                         doneMode = true,
-                        onClick = { 
-                            // 点击已完成任务项后也跳转到功能选择页面
-                            navController?.navigate("add_task")
+                        onClick = {
+                            navController?.navigate("task_form/${task.id}")
                         }
                     )
                 }
@@ -95,10 +94,13 @@ fun TaskItem(
 ) {
     Card(
         elevation = 4.dp,
+        backgroundColor = Color.Transparent,
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                if (!doneMode) Color(0x8832CD32) else Color.Transparent
+                if (!doneMode && task.date != null) Color(0x88FFA959) // 半透明ffa959
+                else if (doneMode) Color(0x8832CD32)
+                else Color.Transparent
             )
             .clickable { onClick() }
     ) {
@@ -121,7 +123,31 @@ fun TaskItem(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = task.description, style = MaterialTheme.typography.body2)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "优先级：${String.format("%.2f", task.priority)}", style = MaterialTheme.typography.caption)
+                val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "优先级：${String.format("%.2f", task.priority)}",
+                        style = MaterialTheme.typography.caption
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    if (task.date != null) {
+                        Text(
+                            text = task.date.format(dateFormatter),
+                            style = MaterialTheme.typography.caption
+                        )
+                    }
+                    if (task.time != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = task.time.format(timeFormatter),
+                            style = MaterialTheme.typography.caption
+                        )
+                    }
+                }
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.example.compose_testing_07_03.data.repository
 
 import com.example.compose_testing_07_03.data.model.Task
+import java.time.LocalDate
 
 class TaskRepository {
     // 这里用内存列表模拟数据源，后续可替换为数据库或网络
@@ -41,7 +42,8 @@ class TaskRepository {
                 description = "掌握 Jetpack Compose 基础用法",
                 profitability = 4,
                 urgency = 3,
-                difficulty = 2
+                difficulty = 2,
+                date = LocalDate.parse("2025-07-10")
             ),
             Task(
                 id = 2L,

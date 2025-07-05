@@ -17,9 +17,11 @@ import androidx.compose.material.Text
 import androidx.compose.material.Scaffold
 import com.example.compose_testing_07_03.ui.screen.TaskListScreen
 import com.example.compose_testing_07_03.ui.screen.FeatureSelectScreen
-import com.example.compose_testing_07_03.ui.screen.AddTaskScreen
+import com.example.compose_testing_07_03.ui.screen.TaskFormScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.compose_testing_07_03.viewmodel.TaskViewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,19 +47,18 @@ fun MainScreen() {
                 navController.navigate("priority")
             })
         }
-        composable("priority") { TaskListScreen(viewModel = taskViewModel, navController = navController) }
-        composable("add_task") { AddTaskScreen(navController = navController, viewModel = taskViewModel) }
-        composable("priority") { 
-            TaskListScreen(
-                viewModel = taskViewModel, 
-                navController = navController
-            ) 
+        composable("priority") {
+            TaskListScreen(viewModel = taskViewModel, navController = navController)
         }
-        composable("add_task") { 
-            AddTaskScreen(
-                navController = navController, 
-                viewModel = taskViewModel
-            ) 
+        composable("task_form") {
+            TaskFormScreen(navController = navController, viewModel = taskViewModel)
+        }
+        composable(
+            route = "task_form/{taskId}",
+            arguments = listOf(navArgument("taskId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val taskId = backStackEntry.arguments?.getLong("taskId")
+            TaskFormScreen(navController = navController, viewModel = taskViewModel, taskId = taskId)
         }
     }
 }
