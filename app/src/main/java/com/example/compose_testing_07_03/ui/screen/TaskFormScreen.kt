@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.compose_testing_07_03.viewmodel.TaskViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.graphics.Color
 import com.example.compose_testing_07_03.data.model.Task
 import com.vanpra.composematerialdialogs.MaterialDialog
@@ -22,7 +21,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun TaskFormScreen(
     navController: NavController,
-    viewModel: TaskViewModel = viewModel(),
+    viewModel: TaskViewModel,
     taskId: Long? = null
 ) {
     val editingTask = taskId?.let { id -> viewModel.tasks.find { it.id == id } }
@@ -44,7 +43,7 @@ fun TaskFormScreen(
                 title = { Text(if (isEditMode) "编辑任务" else "添加任务") },
                 actions = {
                     TextButton(onClick = {
-                        if (title.isNotBlank() && date != null) {
+                        if (title.isNotBlank()) {
                             if (isEditMode) {
                                 val updatedTask = editingTask!!.copy(
                                     title = title,
@@ -55,8 +54,7 @@ fun TaskFormScreen(
                                     date = date,
                                     time = time
                                 )
-                                viewModel.removeTask(editingTask)
-                                viewModel.addTask(updatedTask)
+                                viewModel.updateTask(updatedTask)
                             } else {
                                 viewModel.addTask(
                                     Task(
@@ -133,8 +131,21 @@ fun TaskFormScreen(
                 Text("$difficulty")
             }
             // 日期选择器
-            Button(onClick = { dateDialogState.show() }, modifier = Modifier.fillMaxWidth()) {
-                Text(date?.toString() ?: "选择日期（可选）")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = { dateDialogState.show() }, 
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(date?.toString() ?: "选择日期（可选）")
+                }
+                if (date != null) {
+                    IconButton(onClick = { date = null }) {
+                        Text("×", color = Color.Red)
+                    }
+                }
             }
             MaterialDialog(dialogState = dateDialogState, buttons = { positiveButton("确定") }) {
                 datepicker(
@@ -144,10 +155,24 @@ fun TaskFormScreen(
                     date = pickedDate
                 }
             }
+            
             // 时间选择器
             val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-            Button(onClick = { timeDialogState.show() }, modifier = Modifier.fillMaxWidth()) {
-                Text(time?.format(timeFormatter) ?: "选择时间（可选）")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = { timeDialogState.show() }, 
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(time?.format(timeFormatter) ?: "选择时间（可选）")
+                }
+                if (time != null) {
+                    IconButton(onClick = { time = null }) {
+                        Text("×", color = Color.Red)
+                    }
+                }
             }
             MaterialDialog(dialogState = timeDialogState, buttons = { positiveButton("确定") }) {
                 timepicker(

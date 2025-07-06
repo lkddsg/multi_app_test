@@ -11,18 +11,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.compose_testing_07_03.viewmodel.TaskViewModel
 import com.example.compose_testing_07_03.data.model.Task
 import androidx.navigation.NavController
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun TaskListScreen(viewModel: TaskViewModel = viewModel(), navController: NavController? = null) {
+fun TaskListScreen(viewModel: TaskViewModel, navController: NavController? = null) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("未完成", "已完成")
     val displayTasks = if (selectedTab == 0) viewModel.unfinishedTasksSorted else viewModel.finishedTasksSorted
-
+    var isLoading by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        viewModel.loadTasksAsync()
+        kotlinx.coroutines.delay(500)
+        isLoading = false
+    }
     Scaffold(
         topBar = {
             if (selectedTab == 0) {
@@ -50,34 +54,54 @@ fun TaskListScreen(viewModel: TaskViewModel = viewModel(), navController: NavCon
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(displayTasks, key = { it.id }) { task ->
-                if (selectedTab == 0) {
-                    TaskItem(
-                        task = task,
-                        onDone = { viewModel.markTaskDone(task) },
-                        onRemove = { viewModel.removeTask(task) },
-                        doneMode = false,
-                        onClick = {
-                            navController?.navigate("task_form/${task.id}")
-                        }
-                    )
-                } else {
-                    TaskItem(
-                        task = task,
-                        onDone = {},
-                        onRemove = { viewModel.removeTask(task) },
-                        doneMode = true,
-                        onClick = {
-                            navController?.navigate("task_form/${task.id}")
-                        }
-                    )
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (displayTasks.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "暂无任务", style = MaterialTheme.typography.h6, color = Color.Gray)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(displayTasks, key = { it.id }) { task ->
+                    if (selectedTab == 0) {
+                        TaskItem(
+                            task = task,
+                            onDone = { viewModel.markTaskDone(task) },
+                            onRemove = { viewModel.removeTask(task) },
+                            doneMode = false,
+                            onClick = {
+                                navController?.navigate("task_form/${task.id}")
+                            }
+                        )
+                    } else {
+                        TaskItem(
+                            task = task,
+                            onDone = {},
+                            onRemove = { viewModel.removeTask(task) },
+                            doneMode = true,
+                            onClick = {
+                                navController?.navigate("task_form/${task.id}")
+                            }
+                        )
+                    }
                 }
             }
         }
