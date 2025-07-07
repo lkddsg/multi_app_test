@@ -20,13 +20,10 @@ import java.time.format.DateTimeFormatter
 fun TaskListScreen(viewModel: TaskViewModel, navController: NavController? = null) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("未完成", "已完成")
-    val displayTasks = if (selectedTab == 0) viewModel.unfinishedTasksSorted else viewModel.finishedTasksSorted
-    var isLoading by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) {
-        viewModel.loadTasksAsync()
-        kotlinx.coroutines.delay(500)
-        isLoading = false
-    }
+    val unfinishedTasksSorted by viewModel.unfinishedTasksSorted.collectAsState()
+    val finishedTasksSorted by viewModel.finishedTasksSorted.collectAsState()
+    val displayTasks = if (selectedTab == 0) unfinishedTasksSorted else finishedTasksSorted
+
     Scaffold(
         topBar = {
             if (selectedTab == 0) {
@@ -54,16 +51,7 @@ fun TaskListScreen(viewModel: TaskViewModel, navController: NavController? = nul
             }
         }
     ) { innerPadding ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (displayTasks.isEmpty()) {
+        if (displayTasks.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()

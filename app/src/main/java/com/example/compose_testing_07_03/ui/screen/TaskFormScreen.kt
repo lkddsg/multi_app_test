@@ -24,7 +24,8 @@ fun TaskFormScreen(
     viewModel: TaskViewModel,
     taskId: Long? = null
 ) {
-    val editingTask = taskId?.let { id -> viewModel.tasks.find { it.id == id } }
+    val tasks by viewModel.tasks.collectAsState()
+    val editingTask = taskId?.let { id -> tasks.find { it.id == id.toInt() } }
     var title by remember { mutableStateOf(editingTask?.title ?: "") }
     var description by remember { mutableStateOf(editingTask?.description ?: "") }
     var profitability by remember { mutableStateOf(editingTask?.profitability ?: 1) }
@@ -58,7 +59,6 @@ fun TaskFormScreen(
                             } else {
                                 viewModel.addTask(
                                     Task(
-                                        id = System.currentTimeMillis(),
                                         title = title,
                                         description = description,
                                         profitability = profitability,

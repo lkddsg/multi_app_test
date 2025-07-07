@@ -1,12 +1,15 @@
 package com.example.compose_testing_07_03.data.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.time.LocalDate
 import java.time.LocalTime
 
 // 事项数据类，包含收益性、紧迫性、难易度三个维度
-
+@Entity(tableName = "task")
 data class Task(
-    val id: Long,
+//    val id: Long,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
     val description: String = "",
     val urgency: Int,       // 紧迫性 1~5
